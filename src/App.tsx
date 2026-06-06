@@ -6,9 +6,9 @@ import Home from './pages/Home'
 import Scan from './pages/Scan'
 import PlantResult from './pages/PlantResult'
 import Collection from './pages/Collection'
-import Achievements from './pages/Achievements'
-import MapView from './pages/MapView'
 import Trainer from './pages/Trainer'
+import MapView from './pages/MapView'
+import Achievements from './pages/Achievements'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -38,9 +38,9 @@ export default function App() {
         <Route path="/scan" element={<ProtectedRoute><Scan /></ProtectedRoute>} />
         <Route path="/plant-result" element={<ProtectedRoute><PlantResult /></ProtectedRoute>} />
         <Route path="/collection" element={<ProtectedRoute><Collection /></ProtectedRoute>} />
-        <Route path="/achievements" element={<ProtectedRoute><Achievements /></ProtectedRoute>} />
-        <Route path="/map" element={<ProtectedRoute><MapView /></ProtectedRoute>} />
         <Route path="/trainer" element={<ProtectedRoute><Trainer /></ProtectedRoute>} />
+        <Route path="/map" element={<ProtectedRoute><MapView /></ProtectedRoute>} />
+        <Route path="/achievements" element={<ProtectedRoute><Achievements /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>
