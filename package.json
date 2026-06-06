@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "start": "node server.mjs",
     "preview": "vite preview"
   },
   "devDependencies": {
@@ -23,6 +24,7 @@
     "@react-three/fiber": "^9.6.1",
     "@supabase/supabase-js": "^2.107.0",
     "dotenv": "^17.4.2",
+    "express": "^5.2.1",
     "git": "^0.1.5",
     "leaflet": "^1.9.4",
     "react": "^19.2.7",
