@@ -30,7 +30,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-surface px-5 md:px-8">
+    <div className="min-h-screen bg-surface px-5 md:px-8 pt-18 pb-16">
       <Header />
       <Routes>
         <Route path="/login" element={<Login />} />

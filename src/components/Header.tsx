@@ -1,6 +1,9 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 
+export const TOP_HEADER_H = 'h-14'
+export const BOTTOM_NAV_H = 'h-16'
+
 export default function Header() {
   const { user, signOut } = useAuth()
   const location = useLocation()
@@ -20,8 +23,8 @@ export default function Header() {
 
   return (
     <>
-      <header className="fixed bottom-0 left-0 right-0 z-50 bg-surface border-t-2 border-primary/30">
-        <nav className="flex justify-around items-center h-16 px-1">
+      <header className={`fixed bottom-0 left-0 right-0 z-50 bg-surface border-t-2 border-primary/30 ${BOTTOM_NAV_H}`}>
+        <nav className="flex justify-around items-center h-full px-1">
           {navItems.map(({ path, label, icon }) => (
             <Link
               key={path}
@@ -35,7 +38,7 @@ export default function Header() {
         </nav>
       </header>
 
-      <header className="fixed top-0 left-0 right-0 z-50 bg-surface/95 backdrop-blur-sm border-b-2 border-primary/30 px-4 py-3 flex justify-between items-center">
+      <header className={`fixed top-0 left-0 right-0 z-50 bg-surface/95 backdrop-blur-sm border-b-2 border-primary/30 px-4 py-3 flex justify-between items-center ${TOP_HEADER_H}`}>
         <Link to="/" className="flex items-center gap-2">
           <span className="text-2xl">🌿</span>
           <span className="font-bold text-lg tracking-wider text-accent">POKÉPLANTS</span>
@@ -47,9 +50,6 @@ export default function Header() {
           DÉCONNEXION
         </button>
       </header>
-
-      <div className="h-16" />
-      <div className="h-16" />
     </>
   )
 }
