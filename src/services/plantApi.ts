@@ -32,7 +32,7 @@ export async function identifyPlant(imageBase64: string): Promise<Identification
   formData.append('images', blob, 'plant.jpg')
   formData.append('organs', 'auto')
 
-  const url = `/api/plantnet/v2/identify/all?api-key=${PLANTNET_API_KEY}&lang=fr`
+  const url = 'https://my-api.plantnet.org/v2/identify/all?api-key=' + PLANTNET_API_KEY + '&lang=fr'
 
   const response = await fetch(url, {
     method: 'POST',
