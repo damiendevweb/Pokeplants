@@ -71,7 +71,7 @@ export default function MapView() {
   }, [user])
 
   return (
-    <div className="py-6 space-y-4 max-w-lg mx-auto pb-24">
+    <div className="space-y-4 max-w-lg mx-auto pb-24">
       <div className="flex items-center justify-between">
         <h1 className="text-lg font-bold text-accent tracking-wider">MA CARTE</h1>
         <Link to="/collection" className="text-sm text-primary underline">

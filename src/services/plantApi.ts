@@ -40,8 +40,7 @@ export async function identifyPlant(imageBase64: string): Promise<Identification
   })
 
   if (!response.ok) {
-    const text = await response.text()
-    throw new Error(`PlantNet API error: ${response.status} ${text}`)
+    throw new Error('Aucune plante identifiée. Réessaye avec une photo plus nette.')
   }
 
   const data = await response.json()

@@ -34,7 +34,7 @@ export default function Achievements() {
   const totalUnlocked = unlocked.size
 
   return (
-    <div className="py-6 space-y-4 max-w-lg mx-auto pb-24">
+    <div className="space-y-4 max-w-lg mx-auto pb-24">
       <h1 className="text-lg font-bold text-accent tracking-wider text-center">SUCCÈS</h1>
 
       <div className="bg-card rounded-xl pixel-border p-4 text-center">

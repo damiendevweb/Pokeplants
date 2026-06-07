@@ -27,6 +27,7 @@ export default function PlantResult() {
   const [savedCategory, setSavedCategory] = useState('common')
   const [savedImage, setSavedImage] = useState('')
   const [newAchievements, setNewAchievements] = useState<Achievement[]>([])
+  const [error, setError] = useState('')
 
   useEffect(() => {
     if (!state) navigate('/scan')
@@ -48,6 +49,7 @@ export default function PlantResult() {
   const handleConfirm = async () => {
     if (!user) return
     setSaving(true)
+    setError('')
 
     try {
       const category = determineCategory(plant.family)
@@ -95,8 +97,7 @@ export default function PlantResult() {
 
       if (error) {
         if (error.code === '23505') {
-          alert('Cette plante a déjà été découverte !')
-          navigate('/collection')
+          setError('Cette plante a déjà été découverte !')
           return
         }
         throw error
@@ -113,7 +114,7 @@ export default function PlantResult() {
       const achs = await checkAndUnlockAchievements(user.id)
       if (achs.length > 0) setNewAchievements(achs)
     } catch (err: any) {
-      alert(err.message || 'Erreur lors de la sauvegarde')
+      setError(err.message || 'Erreur lors de la sauvegarde')
     } finally {
       setSaving(false)
     }
@@ -132,8 +133,14 @@ export default function PlantResult() {
 
   return (
     <>
-      <div className="py-6 space-y-4 max-w-lg mx-auto">
+      <div className="space-y-4 max-w-lg mx-auto">
         <h1 className="text-lg font-bold text-accent tracking-wider text-center">RÉSULTAT</h1>
+
+        {error && (
+          <div className="bg-red-500/10 border-2 border-red-400 text-red-400 rounded-xl px-4 py-3 text-sm text-center">
+            {error}
+          </div>
+        )}
 
         <div className="bg-card rounded-xl pixel-border overflow-hidden">
           <div className={`h-48 bg-gradient-to-br ${categoryColor} flex items-center justify-center`}>

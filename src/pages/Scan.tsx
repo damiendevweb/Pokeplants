@@ -15,8 +15,10 @@ export default function Scan() {
   const [streaming, setStreaming] = useState(false)
   const [scanning, setScanning] = useState(false)
   const [preview, setPreview] = useState<string | null>(null)
+  const [error, setError] = useState('')
 
   const startCamera = useCallback(async () => {
+    setError('')
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: 'environment', width: { ideal: 1080 }, height: { ideal: 1080 } },
@@ -26,7 +28,7 @@ export default function Scan() {
         setStreaming(true)
       }
     } catch {
-      alert('Impossible d\'accéder à la caméra. Utilise la galerie à la place.')
+      setError('Impossible d\'accéder à la caméra. Utilise la galerie à la place.')
     }
   }, [])
 
@@ -79,6 +81,7 @@ export default function Scan() {
 
   const handleIdentify = async () => {
     if (!preview) return
+    setError('')
     setScanning(true)
     try {
       const base64 = preview.split(',')[1]
@@ -90,19 +93,25 @@ export default function Scan() {
       navigate('/plant-result', { state: { results, imageUrl: preview, coords } })
     } catch (err: any) {
       console.error('🌿 Erreur identification :', err)
-      alert(err.message || 'Erreur lors de l\'identification')
+      setError(err.message || 'Erreur lors de l\'identification')
       setScanning(false)
     }
   }
 
   const retake = () => {
     setPreview(null)
-    startCamera()
+    setError('')
   }
 
   return (
-    <div className="py-6 space-y-4 max-w-lg mx-auto">
+    <div className="space-y-4 max-w-lg mx-auto">
       <h1 className="text-lg font-bold text-accent tracking-wider text-center">SCANNER</h1>
+
+      {error && (
+        <div className="bg-red-500/10 border-2 border-red-400 text-red-400 rounded-xl px-4 py-3 text-sm text-center">
+          {error}
+        </div>
+      )}
 
       <div className="relative bg-dark rounded-xl pixel-border overflow-hidden aspect-square">
         {!streaming && !preview && (
@@ -165,13 +174,15 @@ export default function Scan() {
             >
               ↩ RETOUR
             </button>
-            <button
-              onClick={handleIdentify}
-              disabled={scanning}
-              className="pixel-btn bg-success text-dark font-bold py-3 px-6 rounded-xl tracking-wider hover:bg-green-500 transition-colors text-sm disabled:opacity-50"
-            >
-              {scanning ? '🔍 ANALYSE...' : '🔍 IDENTIFIER'}
-            </button>
+            {!error && (
+              <button
+                onClick={handleIdentify}
+                disabled={scanning}
+                className="pixel-btn bg-success text-dark font-bold py-3 px-6 rounded-xl tracking-wider hover:bg-green-500 transition-colors text-sm disabled:opacity-50"
+              >
+                {scanning ? '🔍 ANALYSE...' : '🔍 IDENTIFIER'}
+              </button>
+            )}
           </>
         )}
       </div>
