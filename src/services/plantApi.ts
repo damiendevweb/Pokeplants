@@ -50,9 +50,6 @@ if (!response.ok) {
 
   const data = await response.json()
 
-  console.log('🌿 PlantNet - Réponse complète :', JSON.stringify(data, null, 2))
-  console.log('🌿 PlantNet - Premier résultat :', data.results?.[0])
-
   if (!data.results?.length) {
     throw new Error('Aucune plante identifiée')
   }

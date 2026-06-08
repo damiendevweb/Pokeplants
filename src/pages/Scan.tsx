@@ -89,7 +89,6 @@ export default function Scan() {
         identifyPlant(base64),
         requestLocation(),
       ])
-      console.log('🌿 Résultats d\'identification :', results)
       navigate('/plant-result', { state: { results, imageUrl: preview, coords } })
     } catch (err: any) {
       console.error('🌿 Erreur identification :', err)

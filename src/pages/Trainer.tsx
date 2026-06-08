@@ -123,8 +123,6 @@ export default function Trainer() {
       }
     })
 
-  console.log('=== TRAINER equippedItems ===', equippedItems)
-
   const handleBuy = async (item: ShopItem) => {
     if (!user || !stats || stats.coins < item.price) return
     const { error } = await supabase.from('user_inventory').insert({

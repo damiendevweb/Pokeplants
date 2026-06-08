@@ -26,10 +26,6 @@ app.use('/api/plantnet', async (req, res) => {
     }
     headers['accept'] = 'application/json'
 
-    console.log('PlantNet targetUrl:', targetUrl)
-    console.log('PLANTNET_API_KEY exists:', !!PLANTNET_API_KEY)
-    console.log('PLANTNET_API_KEY length:', PLANTNET_API_KEY?.length)
-
     const response = await fetch(targetUrl, {
       method: req.method,
       headers,

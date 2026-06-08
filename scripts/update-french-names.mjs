@@ -22,7 +22,6 @@ async function getFrenchName(scientificName) {
 }
 
 async function main() {
-  console.log('🌿 Récupération des plantes sans nom français...')
 
   const { data: plants, error } = await supabase
     .from('plant_species')
@@ -30,8 +29,6 @@ async function main() {
 
   if (error) { console.error('Erreur Supabase:', error.message); return }
   if (!plants?.length) { console.log('Aucune plante trouvée.'); return }
-
-  console.log(`${plants.length} plantes trouvées. Utilisation ~${plants.length * 0.5} crédits.\n`)
 
   for (const plant of plants) {
     process.stdout.write(`${plant.scientific_name}... `)

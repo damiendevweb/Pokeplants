@@ -38,10 +38,6 @@ export default function PlantResult() {
   const { results, imageUrl, coords } = state
   const plant = results[selected]
 
-  console.log('🌿 Plante sélectionnée :', plant)
-  console.log('🌿 Famille reçue de l\'API :', `"${plant.family}"`)
-  console.log('🌿 Catégorie trouvée dans le mapping :', FAMILY_RARITY[plant.family] || 'common (fallback)')
-
   const determineCategory = (family: string): string => {
     return FAMILY_RARITY[family] || 'common'
   }
