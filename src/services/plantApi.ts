@@ -37,9 +37,16 @@ export async function identifyPlant(imageBase64: string): Promise<Identification
     body: formData,
   })
 
-  if (!response.ok) {
-    throw new Error('Aucune plante identifiée. Réessaye avec une photo plus nette.')
-  }
+if (!response.ok) {
+  const text = await response.text()
+  console.error('PlantNet proxy HTTP error:', response.status, text)
+
+  throw new Error(
+    response.status === 401
+      ? 'Erreur PlantNet : clé API invalide ou accès non autorisé.'
+      : 'Aucune plante identifiée. Réessaye avec une photo plus nette.'
+  )
+}
 
   const data = await response.json()
 
