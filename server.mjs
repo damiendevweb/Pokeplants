@@ -5,38 +5,49 @@ import { dirname, join } from 'path'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const app = express()
 const PORT = process.env.PORT || 3000
+const PLANTNET_API_KEY = process.env.PLANTNET_API_KEY
 
 app.use(express.static(join(__dirname, 'dist')))
 
 app.use('/api/plantnet', async (req, res) => {
-  const targetUrl = `https://my-api.plantnet.org${req.url}`
+  const separator = req.url.includes('?') ? '&' : '?'
+  const targetUrl = `https://my-api.plantnet.org${req.url}${separator}api-key=${PLANTNET_API_KEY}`
 
   try {
-    const fetchOptions = {
+    const chunks = []
+    for await (const chunk of req) {
+      chunks.push(chunk)
+    }
+    const bodyBuffer = Buffer.concat(chunks)
+
+    const headers = {}
+    if (req.headers['content-type']) {
+      headers['content-type'] = req.headers['content-type']
+    }
+    headers['accept'] = 'application/json'
+
+    const response = await fetch(targetUrl, {
       method: req.method,
-      headers: { ...req.headers, host: 'my-api.plantnet.org' },
-    }
-
-    if (['POST', 'PUT', 'PATCH'].includes(req.method)) {
-      fetchOptions.body = await new Promise((resolve) => {
-        const chunks = []
-        req.on('data', (c) => chunks.push(c))
-        req.on('end', () => resolve(Buffer.concat(chunks)))
-      })
-    }
-
-    const response = await fetch(targetUrl, fetchOptions)
-
-    res.status(response.status)
-    response.headers.forEach((value, key) => {
-      if (key !== 'transfer-encoding') res.setHeader(key, value)
+      headers,
+      body: ['POST', 'PUT', 'PATCH'].includes(req.method) ? bodyBuffer : undefined,
     })
 
-    const body = Buffer.from(await response.arrayBuffer())
-    res.send(body)
+    const responseBuffer = Buffer.from(await response.arrayBuffer())
+
+    res.status(response.status)
+
+    const contentType = response.headers.get('content-type')
+    if (contentType) {
+      res.setHeader('content-type', contentType)
+    }
+
+    res.send(responseBuffer)
   } catch (err) {
     console.error('PlantNet proxy error:', err)
-    res.status(502).json({ error: 'Proxy error' })
+    res.status(502).json({
+      error: 'Proxy error',
+      details: err instanceof Error ? err.message : String(err),
+    })
   }
 })
 

@@ -1,5 +1,3 @@
-const PLANTNET_API_KEY = import.meta.env.VITE_PLANTNET_API_KEY
-
 export interface IdentificationResult {
   id: string
   scientificName: string
@@ -32,7 +30,7 @@ export async function identifyPlant(imageBase64: string): Promise<Identification
   formData.append('images', blob, 'plant.jpg')
   formData.append('organs', 'auto')
 
-  const url = `/api/plantnet/v2/identify/all?api-key=${PLANTNET_API_KEY}&lang=fr`
+  const url = '/api/plantnet/v2/identify/all?lang=fr'
 
   const response = await fetch(url, {
     method: 'POST',

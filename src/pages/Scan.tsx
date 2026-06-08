@@ -194,6 +194,18 @@ export default function Scan() {
         onChange={handleFileUpload}
         className="hidden"
       />
+
+      <div className="text-center pt-4 border-t border-dark/30">
+        <p className="text-xs text-text-muted/60 leading-relaxed">
+          The image-based plant species identification service used, is based on the{' '}
+          <a href="https://my.plantnet.org/" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">
+            Pl@ntNet recognition API
+          </a>, regularly updated and accessible through the site{' '}
+          <a href="https://my.plantnet.org/" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">
+            https://my.plantnet.org/
+          </a>
+        </p>
+      </div>
     </div>
   )
 }
