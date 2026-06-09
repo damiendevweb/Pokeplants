@@ -65,8 +65,9 @@ export default function Leaderboard() {
                 rankStyles[rank] || ''
               } ${isMe ? 'ring-2 ring-primary/50' : ''}`}
             >
-              <span className="text-sm font-bold w-8 text-center">
-                {rankEmojis[rank] || <span className="text-text-muted">#{rank}</span>}
+              <span className="text-sm font-bold w-8 text-center flex flex-col items-center leading-none">
+                <span>{rankEmojis[rank] || ''}</span>
+                <span className="text-text-muted text-xs">#{rank}</span>
               </span>
               <span className="text-sm font-bold flex-1 truncate">
                 {entry.display_name}

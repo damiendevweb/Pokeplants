@@ -20,6 +20,8 @@ interface ShopItem {
   model_path: string | null
   bone_name: string | null
   item_position: string | null
+  item_rotation: string | null
+  item_scale: number | null
 }
 
 interface InventoryItem {
@@ -116,10 +118,22 @@ export default function Trainer() {
           }
         }
       } catch {}
+      let rot: [number, number, number] = [0, 0, 0]
+      try {
+        const raw = (i.shop_item as any).item_rotation
+        if (raw) {
+          const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw
+          if (Array.isArray(parsed) && parsed.length >= 3) {
+            rot = [parsed[0], parsed[1], parsed[2]]
+          }
+        }
+      } catch {}
       return {
         model_path: i.shop_item!.model_path!,
         bone_name: i.shop_item!.bone_name!,
         position: pos,
+        rotation: rot,
+        scale: (i.shop_item as any).item_scale ?? undefined,
       }
     })
 

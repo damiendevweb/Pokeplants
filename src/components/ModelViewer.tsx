@@ -1,5 +1,5 @@
-import { useRef, useEffect, useMemo, useState } from "react";
-import { Box3, Vector3 } from "three";
+import { useRef, useEffect, useState, Suspense } from "react";
+import { Box3, Vector3, BoxGeometry, MeshBasicMaterial, Mesh, BackSide } from "three";
 import type { Group, Object3D } from "three";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
@@ -26,13 +26,6 @@ interface ModelProps {
   rotateY: number;
   animSpeed: number;
   equippedItems: EquippedItemData[];
-  hatX: number;
-  hatY: number;
-  hatZ: number;
-  hatRotX: number;
-  hatRotY: number;
-  hatRotZ: number;
-  hatScale: number;
 }
 
 interface Props {
@@ -44,7 +37,7 @@ function HatOnBone({
   boneRef,
   position = [0, 0, 0],
   rotation = [0, 0, 0],
-  scale = 0.15,
+  scale = 22.5,
 }: {
   hatScene: Object3D;
   boneRef: Object3D;
@@ -59,15 +52,52 @@ function HatOnBone({
     hat.rotation.set(...rotation);
     hat.scale.setScalar(scale);
 
+    const maskGeo = new BoxGeometry(0.5, 0.3, 0.5);
+    const maskMat = new MeshBasicMaterial({
+      colorWrite: false,
+      depthWrite: true,
+      side: BackSide,
+    });
+    const mask = new Mesh(maskGeo, maskMat);
+    mask.name = "hairMask";
+    mask.position.set(0, 0.18, 0);
+
     boneRef.add(hat);
+    boneRef.add(mask);
     boneRef.updateMatrixWorld(true);
 
     return () => {
       boneRef.remove(hat);
+      boneRef.remove(mask);
     };
   }, [hatScene, boneRef, position, rotation, scale]);
 
   return null;
+}
+
+function EquippedHat({
+  modelPath,
+  boneRef,
+  position,
+  rotation,
+  scale,
+}: {
+  modelPath: string;
+  boneRef: Object3D;
+  position: [number, number, number];
+  rotation: [number, number, number];
+  scale: number;
+}) {
+  const { scene } = useGLTF(modelPath);
+  return (
+    <HatOnBone
+      hatScene={scene}
+      boneRef={boneRef}
+      position={position}
+      rotation={rotation}
+      scale={scale}
+    />
+  );
 }
 
 function Model({
@@ -77,19 +107,11 @@ function Model({
   rotateY,
   animSpeed,
   equippedItems,
-  hatX,
-  hatY,
-  hatZ,
-  hatRotX,
-  hatRotY,
-  hatRotZ,
-  hatScale,
 }: ModelProps) {
   const groupRef = useRef<Group>(null!);
   const innerRef = useRef<Group>(null!);
   const { scene, animations } = useGLTF("/models/pokeplants-trainer.glb");
   const { actions } = useAnimations(animations, groupRef);
-  const { scene: hatSource } = useGLTF("/models/items/witch-hat.glb");
   const { camera } = useThree();
   const clock = useRef(0);
   const baseY = useRef(0);
@@ -108,16 +130,12 @@ function Model({
         const bone = child.skeleton.getBoneByName(equippedHat.bone_name);
         if (bone) {
           foundBone = bone;
-          console.log("BONE FOUND VIA SKELETON:", bone.name);
         }
       }
     });
 
     if (!foundBone && equippedHat?.bone_name) {
       foundBone = scene.getObjectByName(equippedHat.bone_name) || null;
-      if (foundBone) {
-        console.log("BONE FOUND VIA SCENE:", foundBone.name);
-      }
     }
 
     setTargetBone(foundBone);
@@ -172,14 +190,17 @@ function Model({
       <group ref={innerRef}>
         <primitive object={scene} />
 
-        {targetBone && hatSource && equippedHat && (
-          <HatOnBone
-            hatScene={hatSource}
-            boneRef={targetBone}
-            position={[hatX, hatY, hatZ]}
-            rotation={[hatRotX, hatRotY, hatRotZ]}
-            scale={hatScale}
-          />
+        {targetBone && equippedHat && (
+          <Suspense fallback={null}>
+            <EquippedHat
+              key={equippedHat.model_path}
+              modelPath={equippedHat.model_path}
+              boneRef={targetBone}
+              position={equippedHat.position || [0, 0, 0]}
+              rotation={equippedHat.rotation || [0, 0, 0]}
+              scale={equippedHat.scale ?? 22.5}
+            />
+          </Suspense>
         )}
       </group>
     </group>
@@ -194,13 +215,6 @@ export default function ModelViewer({ equippedItems = [] }: Props) {
   const [animSpeed, setAnimSpeed] = useState(0.4);
   const [showSky, setShowSky] = useState(false);
   const [showControls, setShowControls] = useState(false);
-  const [hatX, setHatX] = useState(0);
-  const [hatY, setHatY] = useState(0.2);
-  const [hatZ, setHatZ] = useState(0);
-  const [hatRotX, setHatRotX] = useState(0);
-  const [hatRotY, setHatRotY] = useState(0);
-  const [hatRotZ, setHatRotZ] = useState(0);
-  const [hatScale, setHatScale] = useState(20);
 
   return (
     <div className="w-full h-full relative">
@@ -216,13 +230,6 @@ export default function ModelViewer({ equippedItems = [] }: Props) {
           rotateY={rotateY}
           animSpeed={animSpeed}
           equippedItems={equippedItems}
-          hatX={hatX}
-          hatY={hatY}
-          hatZ={hatZ}
-          hatRotX={hatRotX}
-          hatRotY={hatRotY}
-          hatRotZ={hatRotZ}
-          hatScale={hatScale}
         />
 
         <OrbitControls enableZoom={false} enablePan={false} />
@@ -331,72 +338,6 @@ export default function ModelViewer({ equippedItems = [] }: Props) {
             } ${showSky ? "bg-primary text-white" : "bg-card"}`}
           >
             {showSky ? "🌅 Ciel ON" : "🌅 Ciel OFF"}
-          </button>
-
-          <div className="border-t border-border pt-2 mt-2">
-            <p className="text-xs font-bold text-primary mb-1">🎩 Chapeau</p>
-
-            <div className="flex items-center gap-2">
-              <label className="text-xs font-bold w-20">Pos X</label>
-              <input type="range" min="-1" max="1" step="0.01" value={hatX} onChange={(e) => setHatX(parseFloat(e.target.value))} className="flex-1" />
-              <span className="text-xs w-10 text-right">{hatX.toFixed(2)}</span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <label className="text-xs font-bold w-20">Pos Y</label>
-              <input type="range" min="-1" max="1" step="0.01" value={hatY} onChange={(e) => setHatY(parseFloat(e.target.value))} className="flex-1" />
-              <span className="text-xs w-10 text-right">{hatY.toFixed(2)}</span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <label className="text-xs font-bold w-20">Pos Z</label>
-              <input type="range" min="-1" max="1" step="0.01" value={hatZ} onChange={(e) => setHatZ(parseFloat(e.target.value))} className="flex-1" />
-              <span className="text-xs w-10 text-right">{hatZ.toFixed(2)}</span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <label className="text-xs font-bold w-20">Rot X</label>
-              <input type="range" min="-3.14" max="3.14" step="0.01" value={hatRotX} onChange={(e) => setHatRotX(parseFloat(e.target.value))} className="flex-1" />
-              <span className="text-xs w-10 text-right">{hatRotX.toFixed(2)}</span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <label className="text-xs font-bold w-20">Rot Y</label>
-              <input type="range" min="-3.14" max="3.14" step="0.01" value={hatRotY} onChange={(e) => setHatRotY(parseFloat(e.target.value))} className="flex-1" />
-              <span className="text-xs w-10 text-right">{hatRotY.toFixed(2)}</span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <label className="text-xs font-bold w-20">Rot Z</label>
-              <input type="range" min="-3.14" max="3.14" step="0.01" value={hatRotZ} onChange={(e) => setHatRotZ(parseFloat(e.target.value))} className="flex-1" />
-              <span className="text-xs w-10 text-right">{hatRotZ.toFixed(2)}</span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <label className="text-xs font-bold w-20">Taille</label>
-              <input type="range" min="0" max="100" step="0.5" value={hatScale} onChange={(e) => setHatScale(parseFloat(e.target.value))} className="flex-1" />
-              <span className="text-xs w-10 text-right">{hatScale.toFixed(1)}</span>
-            </div>
-          </div>
-
-          <button
-            onClick={() => {
-              setModelY(-1.27);
-              setCameraY(0.3);
-              setCameraZ(3.8);
-              setRotateY(0);
-              setAnimSpeed(0.5);
-              setHatX(0);
-              setHatY(0.2);
-              setHatZ(0);
-              setHatRotX(0);
-              setHatRotY(0);
-              setHatRotZ(0);
-              setHatScale(20);
-            }}
-            className="text-xs font-bold text-accent hover:underline"
-          >
-            Réinitialiser
           </button>
         </div>
       )}
