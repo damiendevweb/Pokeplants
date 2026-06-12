@@ -68,11 +68,11 @@ export default function Collection() {
   const rareCount = discoveries.filter(d => (d.plant_species as any).category === 'rare').length
   const legendaryCount = discoveries.filter(d => (d.plant_species as any).category === 'legendary').length
 
-  const filterTabs: { key: FilterType; label: string; icon: string }[] = [
-    { key: 'all', label: 'Tous', icon: '📋' },
-    { key: 'common', label: 'Communes', icon: '🟦' },
-    { key: 'rare', label: 'Rares', icon: '🟪' },
-    { key: 'legendary', label: 'Légendaires', icon: '⭐' },
+  const filterTabs: { key: FilterType; label: string; icon: string, count: number }[] = [
+    { key: 'all', label: 'Tous', icon: '📋', count: discoveries.length },
+    { key: 'common', label: 'Communes', icon: '🟦', count: commonCount },
+    { key: 'rare', label: 'Rares', icon: '🟪', count: rareCount },
+    { key: 'legendary', label: 'Légendaires', icon: '⭐', count: legendaryCount },
   ]
 
   return (
@@ -95,7 +95,7 @@ export default function Collection() {
       />
 
       <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-        {filterTabs.map(({ key, label, icon }) => (
+        {filterTabs.map(({ key, label, icon, count }) => (
           <button
             key={key}
             onClick={() => setFilter(key)}
@@ -103,7 +103,7 @@ export default function Collection() {
               filter === key ? 'bg-primary text-white' : 'bg-card text-text-muted'
             }`}
           >
-            {icon} {label}
+            {icon} {label} <span className="text-xs">({count})</span>
           </button>
         ))}
       </div>
