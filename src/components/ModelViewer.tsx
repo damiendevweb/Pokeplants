@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, Suspense } from "react";
+import { Component, useRef, useEffect, useState, Suspense } from "react";
 import { Box3, Vector3, BoxGeometry, MeshBasicMaterial, Mesh, BackSide } from "three";
 import type { Group, Object3D } from "three";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
@@ -11,9 +11,22 @@ import {
 } from "@react-three/drei";
 import { SkeletonUtils } from "three-stdlib";
 
+class HatErrorBoundary extends Component<
+  { children: React.ReactNode },
+  { hasError: boolean }
+> {
+  state = { hasError: false };
+  static getDerivedStateFromError() { return { hasError: true }; }
+  componentDidCatch() {}
+  render() {
+    return this.state.hasError ? null : this.props.children;
+  }
+}
+
 interface EquippedItemData {
   model_path: string;
-  bone_name: string;
+  bone_name?: string;
+  type?: string;
   position?: [number, number, number];
   rotation?: [number, number, number];
   scale?: number;
@@ -26,10 +39,12 @@ interface ModelProps {
   rotateY: number;
   animSpeed: number;
   equippedItems: EquippedItemData[];
+  pets: EquippedItemData[];
 }
 
 interface Props {
   equippedItems?: EquippedItemData[];
+  pets?: EquippedItemData[];
 }
 
 function HatOnBone({
@@ -100,6 +115,37 @@ function EquippedHat({
   );
 }
 
+function PetCompanion({
+  modelPath,
+  position,
+  rotation,
+  scale,
+}: {
+  modelPath: string;
+  position: [number, number, number];
+  rotation: [number, number, number];
+  scale: number;
+}) {
+  const { scene, animations } = useGLTF(modelPath);
+  const ref = useRef<Group>(null!);
+  const { actions } = useAnimations(animations, ref);
+
+  useEffect(() => {
+    const action = Object.values(actions || {})[0];
+    if (action) {
+      action.reset();
+      action.timeScale = 0.5;
+      action.play();
+    }
+  }, [actions]);
+
+  return (
+    <group ref={ref} position={position} rotation={rotation} scale={scale}>
+      <primitive object={scene} />
+    </group>
+  );
+}
+
 function Model({
   modelY,
   cameraY,
@@ -107,10 +153,11 @@ function Model({
   rotateY,
   animSpeed,
   equippedItems,
+  pets,
 }: ModelProps) {
   const groupRef = useRef<Group>(null!);
   const innerRef = useRef<Group>(null!);
-  const { scene, animations } = useGLTF("/models/pokeplants-trainer.glb");
+  const { scene, animations } = useGLTF("/models/poketrainer.glb");
   const { actions } = useAnimations(animations, groupRef);
   const { camera } = useThree();
   const clock = useRef(0);
@@ -191,27 +238,42 @@ function Model({
         <primitive object={scene} />
 
         {targetBone && equippedHat && (
-          <Suspense fallback={null}>
-            <EquippedHat
-              key={equippedHat.model_path}
-              modelPath={equippedHat.model_path}
-              boneRef={targetBone}
-              position={equippedHat.position || [0, 0, 0]}
-              rotation={equippedHat.rotation || [0, 0, 0]}
-              scale={equippedHat.scale ?? 22.5}
-            />
-          </Suspense>
+          <HatErrorBoundary>
+            <Suspense fallback={null}>
+              <EquippedHat
+                key={equippedHat.model_path}
+                modelPath={equippedHat.model_path}
+                boneRef={targetBone}
+                position={equippedHat.position || [0, 0, 0]}
+                rotation={equippedHat.rotation || [0, 0, 0]}
+                scale={equippedHat.scale ?? 22.5}
+              />
+            </Suspense>
+          </HatErrorBoundary>
         )}
+
+        {pets.map((pet, i) => (
+          <HatErrorBoundary key={pet.model_path + i}>
+            <Suspense fallback={null}>
+              <PetCompanion
+                modelPath={pet.model_path}
+                position={pet.position || [0.5, 0, 0]}
+                rotation={pet.rotation || [0, 0, 0]}
+                scale={pet.scale ?? 0.5}
+              />
+            </Suspense>
+          </HatErrorBoundary>
+        ))}
       </group>
     </group>
   );
 }
 
-export default function ModelViewer({ equippedItems = [] }: Props) {
-  const [modelY, setModelY] = useState(-0.74);
-  const [cameraY, setCameraY] = useState(0.5);
-  const [cameraZ, setCameraZ] = useState(3.8);
-  const [rotateY, setRotateY] = useState(-0.3);
+export default function ModelViewer({ equippedItems = [], pets = [] }: Props) {
+  const [modelY, setModelY] = useState(-1.4);
+  const [cameraY, setCameraY] = useState(0.73);
+  const [cameraZ, setCameraZ] = useState(4);
+  const [rotateY, setRotateY] = useState(-0.16);
   const [animSpeed, setAnimSpeed] = useState(0.4);
   const [showSky, setShowSky] = useState(false);
   const [showControls, setShowControls] = useState(false);
@@ -223,14 +285,17 @@ export default function ModelViewer({ equippedItems = [] }: Props) {
         <directionalLight position={[5, 5, 5]} intensity={1} castShadow />
         <directionalLight position={[-3, 2, -3]} intensity={0.4} />
 
-        <Model
-          modelY={modelY}
-          cameraY={cameraY}
-          cameraZ={cameraZ}
-          rotateY={rotateY}
-          animSpeed={animSpeed}
-          equippedItems={equippedItems}
-        />
+        <HatErrorBoundary>
+          <Model
+            modelY={modelY}
+            cameraY={cameraY}
+            cameraZ={cameraZ}
+            rotateY={rotateY}
+            animSpeed={animSpeed}
+            equippedItems={equippedItems}
+            pets={pets}
+          />
+        </HatErrorBoundary>
 
         <OrbitControls enableZoom={false} enablePan={false} />
         {showSky && (

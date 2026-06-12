@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import ModelViewer from '../components/ModelViewer'
 import LevelBar from '../components/LevelBar'
+import ProfileStatsSection from '../components/ProfileStats'
 
 interface UserStats {
   level: number
@@ -38,6 +39,7 @@ const categoryLabels: Record<string, string> = {
   shoes: 'Chaussures',
   accessory: 'Accessoires',
   bag: 'Sacs',
+  pet: 'Familiers',
 }
 
 const categoryEmojis: Record<string, string> = {
@@ -48,6 +50,7 @@ const categoryEmojis: Record<string, string> = {
   shoes: '👟',
   accessory: '⌚',
   bag: '🎒',
+  pet: '🐾',
 }
 
 export default function Trainer() {
@@ -55,8 +58,9 @@ export default function Trainer() {
   const [stats, setStats] = useState<UserStats | null>(null)
   const [shopItems, setShopItems] = useState<ShopItem[]>([])
   const [inventory, setInventory] = useState<InventoryItem[]>([])
-  const [activeCategory, setActiveCategory] = useState<string>('hat')
+  const [activeCategory, setActiveCategory] = useState<string>('pet')
   const [loading, setLoading] = useState(true)
+  const [displayName, setDisplayName] = useState('')
 
   useEffect(() => {
     if (!user) return
@@ -64,12 +68,13 @@ export default function Trainer() {
     const load = async () => {
       const { data: statsData } = await supabase
         .from('user_stats')
-        .select('level, xp, xp_to_next_level, coins')
+        .select('display_name, level, xp, xp_to_next_level, coins')
         .eq('user_id', user.id)
         .maybeSingle()
 
       if (statsData) {
         setStats(statsData)
+        if (statsData.display_name) setDisplayName(statsData.display_name)
       } else {
         setStats({ level: 1, xp: 0, xp_to_next_level: 100, coins: 0 })
       }
@@ -102,11 +107,11 @@ export default function Trainer() {
 
   const ownedIds = new Set(inventory.map(i => i.item_id))
   const equippedIds = new Set(inventory.filter(i => i.equipped).map(i => i.item_id))
-  const categories = ['hat', 'beard', 'top', 'bottom', 'shoes', 'accessory', 'bag'] as const
+  const categories = ['pet', 'hat', 'beard', 'top', 'bottom', 'shoes', 'accessory', 'bag'] as const
   const filteredItems = shopItems.filter(i => i.type === activeCategory)
 
   const equippedItems = inventory
-    .filter(i => i.equipped && i.shop_item?.model_path && i.shop_item?.bone_name)
+    .filter(i => i.equipped && i.shop_item?.model_path && i.shop_item?.bone_name && i.shop_item?.type !== 'pet')
     .map(i => {
       let pos: [number, number, number] = [0, 0, 0]
       try {
@@ -131,6 +136,38 @@ export default function Trainer() {
       return {
         model_path: i.shop_item!.model_path!,
         bone_name: i.shop_item!.bone_name!,
+        position: pos,
+        rotation: rot,
+        scale: (i.shop_item as any).item_scale ?? undefined,
+      }
+    })
+
+  const equippedPets = inventory
+    .filter(i => i.equipped && i.shop_item?.model_path && i.shop_item?.type === 'pet')
+    .map(i => {
+      let pos: [number, number, number] = [0.5, 0, 0]
+      try {
+        const raw = (i.shop_item as any).item_position
+        if (raw) {
+          const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw
+          if (Array.isArray(parsed) && parsed.length >= 3) {
+            pos = [parsed[0], parsed[1], parsed[2]]
+          }
+        }
+      } catch {}
+      let rot: [number, number, number] = [0, 0, 0]
+      try {
+        const raw = (i.shop_item as any).item_rotation
+        if (raw) {
+          const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw
+          if (Array.isArray(parsed) && parsed.length >= 3) {
+            rot = [parsed[0], parsed[1], parsed[2]]
+          }
+        }
+      } catch {}
+      return {
+        model_path: i.shop_item!.model_path!,
+        type: 'pet' as const,
         position: pos,
         rotation: rot,
         scale: (i.shop_item as any).item_scale ?? undefined,
@@ -194,7 +231,7 @@ export default function Trainer() {
       <div className="text-center animate-slide-up">
         <div className="text-5xl mb-2">🧑‍🌾</div>
         <h1 className="text-xl font-bold text-accent tracking-wider">
-          {user?.email?.split('@')[0] || 'Dresseur'}
+          {displayName || user?.email?.split('@')[0] || 'Dresseur'}
         </h1>
       </div>
 
@@ -205,7 +242,7 @@ export default function Trainer() {
 
       {/* 3D Model */}
       <div className="bg-card rounded-xl pixel-border aspect-square overflow-hidden animate-slide-up">
-        <ModelViewer equippedItems={equippedItems} />
+        <ModelViewer equippedItems={equippedItems} pets={equippedPets} />
       </div>
 
       {/* Boutique */}
@@ -276,6 +313,7 @@ export default function Trainer() {
           </div>
         )}
       </div>
+      <ProfileStatsSection userId={user?.id} itemCount={inventory.length} />
     </div>
   )
 }
