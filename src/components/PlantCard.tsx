@@ -21,7 +21,7 @@ export default function PlantCard(props: Props) {
 
   return (
     <div className="bg-card rounded-xl pixel-border overflow-hidden animate-slide-up hover:scale-[1.02] transition-transform">
-      <div className={`h-32 bg-gradient-to-br ${config.color} flex items-center justify-center overflow-hidden`}>
+      <div className={`relative h-32 bg-gradient-to-br ${config.color} flex items-center justify-center overflow-hidden`}>
         {props.imageUrl && !imgError ? (
           <img
             src={props.imageUrl}
@@ -32,18 +32,14 @@ export default function PlantCard(props: Props) {
         ) : (
           <span className="text-5xl animate-float">🌿</span>
         )}
+        <span className={`absolute top-2 left-2 text-xs px-2 py-0.5 rounded-full bg-gradient-to-r ${config.color} text-black font-bold`}>
+          {config.label}
+        </span>
       </div>
 
       <div className="p-3 space-y-2">
-        <div className="flex justify-between items-start">
-          <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-sm truncate">{props.commonName}</h3>
-            <p className="text-sm text-text-muted italic truncate">{props.scientificName}</p>
-          </div>
-          <span className={`text-sm px-2 py-1 rounded-full bg-gradient-to-r ${config.color} text-black font-bold ml-2`}>
-            {config.label}
-          </span>
-        </div>
+        <h3 className="font-bold text-sm truncate">{props.commonName}</h3>
+        <p className="text-sm text-text-muted italic truncate">{props.scientificName}</p>
 
         {props.family && (
           <p className="text-sm text-text-muted">
