@@ -17,8 +17,8 @@ export default function Header() {
     { path: '/', label: 'Accueil', icon: '🏠' },
     { path: '/scan', label: 'Scanner', icon: '📷' },
     { path: '/collection', label: 'PokéPlants', icon: '🌿' },
-    { path: '/achievements', label: 'Succès', icon: '🏆' },
-    { path: '/trainer', label: 'Dresseur', icon: '🧑‍🌾' },
+    { path: '/leaderboard', label: 'Classement', icon: '🏆' },
+    { path: '/achievements', label: 'Succès', icon: '🎖️' },
   ]
 
   return (
@@ -41,7 +41,7 @@ export default function Header() {
       <header className={`fixed top-0 left-0 right-0 z-50 bg-surface/95 backdrop-blur-sm border-b-2 border-primary/30 px-4 py-3 flex justify-between items-center ${TOP_HEADER_H}`}>
         <Link to="/" className="flex items-center gap-2">
           <span className="text-2xl">🌿</span>
-          <span className="font-bold text-lg tracking-wider text-accent">POKÉPLANTS</span>
+          <h1 className="font-bold text-lg tracking-wider text-accent">POKÉPLANTS</h1>
         </Link>
         <button
           onClick={signOut}

@@ -74,7 +74,7 @@ export default function Collection() {
   const legendaryCount = discoveries.filter(d => (d.plant_species as any).category === 'legendary').length
 
   const filterTabs: { key: FilterType; label: string; icon: string, count: number }[] = [
-    { key: 'all', label: 'Tous', icon: '📋', count: discoveries.length },
+    { key: 'all', label: 'Toutes', icon: '📋', count: discoveries.length },
     { key: 'common', label: 'Communes', icon: '🟦', count: commonCount },
     { key: 'rare', label: 'Rares', icon: '🟪', count: rareCount },
     { key: 'legendary', label: 'Légendaires', icon: '⭐', count: legendaryCount },
@@ -82,15 +82,6 @@ export default function Collection() {
 
   return (
     <div className="space-y-4 max-w-lg mx-auto pb-24">
-      <div className="flex justify-between items-center">
-        <h1 className="text-lg font-bold text-accent tracking-wider">POKÉPLANTS</h1>
-        <div className="flex gap-1">
-          <span className="text-sm bg-red-500/20 text-red-500 w-7 h-7 flex items-center justify-center rounded-full">{commonCount}</span>
-          <span className="text-sm bg-purple-500/20 text-purple-500 w-7 h-7 flex items-center justify-center rounded-full">{rareCount}</span>
-          <span className="text-sm bg-yellow-500/20 text-yellow-500 w-7 h-7 flex items-center justify-center rounded-full">{legendaryCount}</span>
-        </div>
-      </div>
-
       <input
         type="text"
         placeholder="🔍 Rechercher une plante..."
