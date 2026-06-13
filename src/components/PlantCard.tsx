@@ -7,15 +7,12 @@ interface Props {
   category: string
   imageUrl?: string
   discoveredAt: string
-  city?: string
-  region?: string
-  country?: string
 }
 
-const categoryConfig: Record<string, { color: string; label: string; stars: number }> = {
-  common: { color: 'from-blue-400 to-cyan-300', label: 'COMMUNE', stars: 1 },
-  rare: { color: 'from-purple-400 to-pink-300', label: 'RARE', stars: 2 },
-  legendary: { color: 'from-yellow-400 to-orange-300', label: 'LÉGENDAIRE', stars: 3 },
+const categoryConfig: Record<string, { color: string; label: string }> = {
+  common: { color: 'from-blue-400 to-cyan-300', label: 'COMMUNE' },
+  rare: { color: 'from-purple-400 to-pink-300', label: 'RARE' },
+  legendary: { color: 'from-yellow-400 to-orange-300', label: 'LÉGENDAIRE' },
 }
 
 export default function PlantCard(props: Props) {
@@ -48,21 +45,9 @@ export default function PlantCard(props: Props) {
           </span>
         </div>
 
-        <div className="flex gap-1">
-          {Array.from({ length: config.stars }).map((_, i) => (
-            <span key={i} className="text-sm">⭐</span>
-          ))}
-        </div>
-
         {props.family && (
           <p className="text-sm text-text-muted">
             Famille: <span>{props.family}</span>
-          </p>
-        )}
-
-        {(props.city || props.region || props.country) && (
-          <p className="text-sm text-text-muted flex items-center gap-1">
-            📍 {[props.city, props.region, props.country].filter(Boolean).join(', ')}
           </p>
         )}
 

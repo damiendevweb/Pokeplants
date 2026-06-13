@@ -3,15 +3,19 @@ import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import PlantCard from '../components/PlantCard'
+import PlantDetailModal from '../components/PlantDetailModal'
 
 interface PlantDiscovery {
   id: number
   discovered_at: string
   image_url: string
+  latitude: number | null
+  longitude: number | null
   plant_species: {
     scientific_name: string
     common_name: string
     family: string
+    genus: string
     category: string
   }
 }
@@ -26,6 +30,7 @@ export default function Collection() {
   const [filter, setFilter] = useState<FilterType>('all')
   const [sort, setSort] = useState<SortType>('recent')
   const [search, setSearch] = useState('')
+  const [selectedDiscovery, setSelectedDiscovery] = useState<PlantDiscovery | null>(null)
 
   useEffect(() => {
     if (!user) return
@@ -35,7 +40,7 @@ export default function Collection() {
   const loadDiscoveries = async () => {
     const { data } = await supabase
       .from('discoveries')
-      .select('id, discovered_at, image_url, plant_species (scientific_name, common_name, family, category)')
+      .select('id, discovered_at, image_url, latitude, longitude, plant_species (scientific_name, common_name, family, genus, category)')
       .eq('user_id', user!.id)
       .order('discovered_at', { ascending: false })
 
@@ -155,7 +160,12 @@ export default function Collection() {
           {filtered.map((d, i) => {
             const species = d.plant_species as any
             return (
-              <div key={d.id} style={{ animationDelay: `${i * 0.05}s` }}>
+              <div
+                key={d.id}
+                style={{ animationDelay: `${i * 0.05}s` }}
+                className="cursor-pointer"
+                onClick={() => setSelectedDiscovery(d)}
+              >
                 <PlantCard
                   commonName={species.common_name || species.scientific_name}
                   scientificName={species.scientific_name}
@@ -168,6 +178,13 @@ export default function Collection() {
             )
           })}
         </div>
+      )}
+
+      {selectedDiscovery && (
+        <PlantDetailModal
+          discovery={selectedDiscovery}
+          onClose={() => setSelectedDiscovery(null)}
+        />
       )}
     </div>
   )
