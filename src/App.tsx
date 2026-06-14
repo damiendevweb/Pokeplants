@@ -8,6 +8,7 @@ import PlantResult from './pages/PlantResult'
 import Collection from './pages/Collection'
 import MapView from './pages/MapView'
 import Achievements from './pages/Achievements'
+import Profile from './pages/Profile'
 import Leaderboard from './components/Leaderboard'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -40,6 +41,7 @@ export default function App() {
         <Route path="/collection" element={<ProtectedRoute><Collection /></ProtectedRoute>} />
         <Route path="/map" element={<ProtectedRoute><MapView /></ProtectedRoute>} />
         <Route path="/achievements" element={<ProtectedRoute><Achievements /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

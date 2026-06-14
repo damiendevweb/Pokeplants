@@ -1,12 +1,15 @@
+import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import BurgerMenu from './BurgerMenu'
 
 export const TOP_HEADER_H = 'h-14'
 export const BOTTOM_NAV_H = 'h-16'
 
 export default function Header() {
-  const { user, signOut } = useAuth()
+  const { user } = useAuth()
   const location = useLocation()
+  const [menuOpen, setMenuOpen] = useState(false)
 
   if (!user || location.pathname === '/login') return null
 
@@ -44,12 +47,17 @@ export default function Header() {
           <h1 className="font-bold text-lg tracking-wider text-accent">POKÉPLANTS</h1>
         </Link>
         <button
-          onClick={signOut}
-          className="text-sm text-text-muted hover:text-red-400 transition-colors pixel-border px-3 py-1"
+          onClick={() => setMenuOpen(true)}
+          className="flex flex-col gap-1 p-2"
+          aria-label="Menu"
         >
-          DÉCONNEXION
+          <span className="w-5 h-0.5 bg-text-muted rounded-full" />
+          <span className="w-5 h-0.5 bg-text-muted rounded-full" />
+          <span className="w-5 h-0.5 bg-text-muted rounded-full" />
         </button>
       </header>
+
+      <BurgerMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
     </>
   )
 }
